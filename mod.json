@@ -1,0 +1,44 @@
+{
+	"geode": "4.2.0",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "viper.object_pinning",
+	"name": "Object Pinning",
+	"version": "v1.0.0",
+	"developer": "Viper",
+	"resources" : {
+		"files": [
+			"1f4cc.png"
+		]
+	},
+	"links": {
+		"source": ""
+	},
+	"settings": {	
+		"shift-keybind": {
+			"name": "Shift Keybind",
+			"description": "When enabled, hold shift while selecting a <co>object</c> to <cf>pin</c> or <cf>unpin</c>",
+			"type": "bool",
+			"default": true,
+			"platforms": ["desktop"]
+		}
+	},
+	"incompatibilities": [
+		{
+			"id": "razoom.object_groups",
+			"version": ">=v1.0.0",
+			"importance": "breaking"
+		}
+	],
+	"dependencies": {
+		"alphalaneous.editortab_api": {
+			"version": "1.0.0",
+			"importance": "required"
+		}
+	},
+	"description": "be able to pin objects in the editor to a pins tab"
+}
