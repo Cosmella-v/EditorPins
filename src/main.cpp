@@ -64,7 +64,6 @@ class $modify(ViperEditorUI,EditorUI) {
                                 if (Pinned_Items.contains(objid_str)) {
                                     Pinned_Items.erase(objid_str);
                                     Saved::Pinned_ItemsString = Pinned_Items.dump(matjson::NO_INDENTATION);
-                                    this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
                                     Mod::get()->setSavedValue<std::string>("Pinned-Items", Saved::Pinned_ItemsString);
                                     this->updatePinTab();
                                 }
@@ -81,7 +80,6 @@ class $modify(ViperEditorUI,EditorUI) {
                     };
                     Pinned_Items.set(objid_str,true);
                     Saved::Pinned_ItemsString = Pinned_Items.dump(matjson::NO_INDENTATION);
-                    this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
                     Mod::get()->setSavedValue<std::string>("Pinned-Items", Saved::Pinned_ItemsString);
                     this->updatePinTab();
                     return;
