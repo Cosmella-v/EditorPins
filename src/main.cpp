@@ -72,7 +72,7 @@ class $modify(ViperEditorUI,EditorUI) {
                             return;
                         },true);
         } else {
-            geode::createQuickPopup("Pin Object?","Are you sure you want to <co>pin</c> this object?\nYou will be able to find it in <cf>pinned</c> tab","Yes","No",[this,objid_str](auto c, bool sel){
+            geode::createQuickPopup("Pin Object?","Are you sure you want to <co>pin</c> this object?\nYou will be able to find it in the <cf>pinned</c> tab","Yes","No",[this,objid_str](auto c, bool sel){
                 if (!sel) {
                     auto Pinned_Items = matjson::parse(this->m_fields->m_currentjson).unwrapOrDefault();
                     if (Pinned_Items.contains(objid_str)) {
