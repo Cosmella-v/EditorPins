@@ -63,8 +63,8 @@ class $modify(ViperEditorUI,EditorUI) {
                                  auto Pinned_Items = matjson::parse(this->m_fields->m_currentjson).unwrapOrDefault();
                                 if (Pinned_Items.contains(objid_str)) {
                                     Pinned_Items.erase(objid_str);
-                                    this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
                                     Saved::Pinned_ItemsString = Pinned_Items.dump(matjson::NO_INDENTATION);
+                                    this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
                                     Mod::get()->setSavedValue<std::string>("Pinned-Items", Saved::Pinned_ItemsString);
                                     this->updatePinTab();
                                 }
@@ -80,8 +80,8 @@ class $modify(ViperEditorUI,EditorUI) {
                         return;
                     };
                     Pinned_Items.set(objid_str,true);
-                    this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
                     Saved::Pinned_ItemsString = Pinned_Items.dump(matjson::NO_INDENTATION);
+                    this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
                     Mod::get()->setSavedValue<std::string>("Pinned-Items", Saved::Pinned_ItemsString);
                     this->updatePinTab();
                     return;
