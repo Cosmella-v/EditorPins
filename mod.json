@@ -36,7 +36,7 @@
 	],
 	"dependencies": {
 		"alphalaneous.editortab_api": {
-			"version": "1.0.0",
+			"version": ">=v1.0.0",
 			"importance": "required"
 		}
 	},
