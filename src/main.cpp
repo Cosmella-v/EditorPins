@@ -116,6 +116,11 @@ class $modify(ViperEditorUI,EditorUI) {
                     xd->m_subBGSprite->setColor(ccColor3B(255,255,255));
                     //log::debug("log3");
                 }
+                if (m_btnfixs->m_objectID  >= 4386 && m_btnfixs->m_objectID  <= 4399) {
+                    if (GameObject* object = xd->getChildByType<GameObject*>(0)) {
+                        object->setScale(0.175);
+                    };
+                };
             } else {log::error("something bad got in");}
         };
     }
@@ -133,13 +138,6 @@ class $modify(ViperEditorUI,EditorUI) {
             }
         };
         CreateMenuItem* x = EditorUI::getCreateBtn(id,bg);
-         if (id >= 4386 && id <= 4399) {
-                if (auto xd = typeinfo_cast<ButtonSprite*>(x->getNormalImage())) {
-                    if (CCSprite* object = x->getChildByType<CCSprite*>(1)) {
-                        object->setScale(0.175);
-                    };
-                };
-            };
         this->m_fields->m_btnfix.emplace_back(x);
         return x;
     } 
