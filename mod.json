@@ -8,7 +8,7 @@
 	},
 	"id": "viper.object_pinning",
 	"name": "Object Pinning",
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"developer": "Viper",
 	"resources" : {
 		"files": [
