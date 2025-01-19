@@ -6,34 +6,81 @@
 		"mac": "2.2074",
 		"ios": "2.2074"
 	},
+	"tags": ["editor","interface"],
 	"id": "viper.object_pinning",
 	"name": "Object Pinning",
-	"version": "v1.0.1",
+	"version": "v1.0.2",
 	"developer": "Viper",
 	"resources" : {
-		"files": [
+		"sprites": [
 			"1f4cc.png"
 		]
 	},
 	"links": {
 		"source": "https://github.com/MuhXd/EditorPins"
 	},
-	"settings": {	
+	"settings": {
+		"main-title": {
+            "type": "title",
+            "name": "Main Settings"
+        },
+		"item-per-row": {
+			"type": "int",
+			"name": "Item per row",
+			"default": 8,
+			"description": "In the <cf>pin</c> button menu select the amount of <co>object</c> per <cy>row</c>",
+			"min": 1,
+            "max": 20
+		},
+		"pin-objects-background": {
+			"type": "string",
+			"name": "Pinned Objects Background",
+			"default": "Light Blue",
+			"description": "Set <co>background</c> color for <cf>pinned</c> <co>object</c>",
+			"one-of": [
+				"Light Blue","Green","Grey","Pink","Dark Grey","Red"
+			]
+		},
+		"pin-button-background": {
+			"type": "string",
+			"name": "Pin Button Background",
+			"default": "Green",
+			"description": "Set <co>background</c> color for <cf>pin</c> button",
+			"one-of": [
+				"Green","Light Blue","Grey","Pink","Dark Grey","Red"
+			]
+		},
+		"desktop-title": {
+            "type": "title",
+            "name": "Desktop Settings",
+			"platforms": ["desktop"]
+        },
 		"shift-keybind": {
 			"name": "Shift Keybind",
 			"description": "When enabled, hold shift while selecting a <co>object</c> to <cf>pin</c> or <cf>unpin</c>",
 			"type": "bool",
 			"default": true,
 			"platforms": ["desktop"]
+		},
+		"mobile-title": {
+            "type": "title",
+            "name": "Mobile Settings",
+			"platforms": ["mobile"]
+        },
+		"hold-to-pin": {
+			"name": "hold to pin",
+			"description": "When enabled, hold a <co>object</c> for 2s to <cf>pin</c> or <cf>unpin</c>",
+			"type": "bool",
+			"default": true,
+			"platforms": ["mobile"]
 		}
 	},
-	"incompatibilities": [
-		{
-			"id": "razoom.object_groups",
-			"version": ">=v1.0.0",
-			"importance": "breaking"
+	"incompatibilities": {
+		"razoom.object_groups": {
+			"importance": "breaking",
+			"version": ">=v1.0.0"
 		}
-	],
+	},
 	"dependencies": {
 		"alphalaneous.editortab_api": {
 			"version": ">=v1.0.0",

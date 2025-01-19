@@ -3,6 +3,7 @@
 #include "pinPopup.hpp"
 using namespace geode::prelude;
 #include <Geode/modify/EditorUI.hpp>
+
 bool isValidInteger(const std::string& str) {
     if (str.empty()) return false;
     
@@ -19,7 +20,90 @@ bool isValidInteger(const std::string& str) {
     
     return true;
 }
+// android features
+#ifdef GEODE_IS_MOBILE
+void ViperEditorUI_popupPrompt(int obj, EditorUI* editor);
+#include <Geode/modify/CCMenuItemSpriteExtra.hpp>
 
+class $modify(CCMenuItemSpriteExtra_MobileSelector,CCMenuItemSpriteExtra) {
+struct Fields {
+    bool m_trackHolding;
+    bool m_HoldAble;
+    cocos2d::CCLayerColor* m_fillNode;
+};
+void popupPrompt() {
+    if (this->m_fields->m_fillNode) {
+        this->m_fields->m_fillNode->removeFromParentAndCleanup(true);
+        this->m_fields->m_fillNode = nullptr;
+    }
+    if (EditorUI* editor = EditorUI::get()) {
+        if (auto holding = typeinfo_cast<CreateMenuItem*>(this)) {
+            ViperEditorUI_popupPrompt(holding->m_objectID, editor);
+        }
+    }
+}
+virtual void selected() {
+    CCMenuItemSpriteExtra::selected();
+    if (Mod::get()->getSettingValue<bool>("hold-to-pin") && this->m_fields->m_HoldAble && !CCScene::get()->getChildByIDRecursive("Pin-Prompt"_spr)) {
+    if (auto holding = typeinfo_cast<CreateMenuItem*>(this)) {
+        this->m_fields->m_trackHolding = true;
+        if (this->m_fields->m_fillNode) {
+            this->m_fields->m_fillNode->removeFromParentAndCleanup(true);
+            this->m_fields->m_fillNode = nullptr;
+        }
+        
+        this->m_fields->m_fillNode = cocos2d::CCLayerColor::create({0, 255, 0, 128},210.f, 35.f); 
+        this->m_fields->m_fillNode->setAnchorPoint({1, 0.0f}); 
+        this->m_fields->m_fillNode->setContentSize({34,1}); // 34 
+        this->m_fields->m_fillNode->setZOrder(1003); 
+        this->m_fields->m_fillNode->setPosition({3,3});
+        this->m_fields->m_fillNode->setID("fill-bar"_spr);
+        auto fillAction = CCScaleTo::create(2.5, 1, 34);
+        this->m_pNormalImage->addChild(this->m_fields->m_fillNode);
+        auto callFuncAction = CCCallFunc::create(this, callfunc_selector(CCMenuItemSpriteExtra_MobileSelector::popupPrompt));
+        auto sequence = CCSequence::create(fillAction, callFuncAction, nullptr); 
+        this->m_fields->m_fillNode->runAction(sequence);
+        }
+    }
+}
+virtual void activate() {
+    CCMenuItemSpriteExtra::activate();
+    if (this->m_fields->m_HoldAble) {
+        if (auto holding = typeinfo_cast<CreateMenuItem*>(this)) {
+            this->m_fields->m_trackHolding = false;
+            if (this->m_fields->m_fillNode) {
+                this->m_fields->m_fillNode->removeFromParentAndCleanup(true);
+                this->m_fields->m_fillNode = nullptr;
+            }
+        }
+    }
+}
+virtual void unselected() {
+    CCMenuItemSpriteExtra::unselected();
+    if (this->m_fields->m_HoldAble) {
+        if (auto holding = typeinfo_cast<CreateMenuItem*>(this)) {
+            this->m_fields->m_trackHolding = false;
+            if (this->m_fields->m_fillNode) {
+                this->m_fields->m_fillNode->removeFromParentAndCleanup(true);
+                this->m_fields->m_fillNode = nullptr;
+            }
+        }
+    }
+}
+
+};
+#endif
+
+/*
+"hide-pin-button": {
+			"name": "Disable Pin button",
+			"description": "Disables the <cf>pin</c> button to view all objects",
+			"type": "bool",
+			"enable-if": "!shift-keybind && !hold-to-pin",
+			"default": false
+		},
+        
+*/
 class $modify(ViperEditorUI,EditorUI) {
     struct Fields {
         std::vector<CreateMenuItem*> m_btnfix;
@@ -27,9 +111,17 @@ class $modify(ViperEditorUI,EditorUI) {
         std::string m_currentjson = "";
         EditButtonBar* m_createEditButtonBar;
     };
+    #ifdef GEODE_IS_MOBILE
+    CreateMenuItem* getCreateBtn(int id, int bg) {
+        CreateMenuItem* item = EditorUI::getCreateBtn(id,bg);
+        if (CCMenuItemSpriteExtra* itemx = typeinfo_cast<CCMenuItemSpriteExtra*>(item)) {
+            reinterpret_cast<CCMenuItemSpriteExtra_MobileSelector*>(itemx)->m_fields->m_HoldAble = true;
+        }
+        return item;
+    }
+    #endif
     void updatePinTab(){
             this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
-            
             auto rows = GameManager::get()->getIntGameVariable("0050");
             auto cols = GameManager::get()->getIntGameVariable("0049");
             this->m_fields->m_btnfix.clear();
@@ -58,8 +150,8 @@ class $modify(ViperEditorUI,EditorUI) {
         std::string objid_str = std::to_string(objid);
         auto Pinned_Items = matjson::parse(this->m_fields->m_currentjson).unwrapOrDefault();
         if (Pinned_Items.contains(objid_str)) {
-            geode::createQuickPopup("Unpin Object?","Are you sure you want to <co>unpin</c> this object?\nYou will be unable to find it in the <cf>pinned</c> tab","Yes","No",[this,objid_str](auto c, bool sel){
-                            if (!sel) {
+            geode::createQuickPopup("Unpin Object?","Are you sure you want to <cf>unpin</c> this <co>object</c>?\nYou will be unable to find it in the <cf>pinned</c> tab.","No","Yes",[this,objid_str](auto c, bool sel){
+                            if (sel) {
                                  auto Pinned_Items = matjson::parse(this->m_fields->m_currentjson).unwrapOrDefault();
                                 if (Pinned_Items.contains(objid_str)) {
                                     Pinned_Items.erase(objid_str);
@@ -70,10 +162,10 @@ class $modify(ViperEditorUI,EditorUI) {
                                 return;
                             }
                             return;
-                        },true);
+                        },true)->setID("Pin-Prompt"_spr);
         } else {
-            geode::createQuickPopup("Pin Object?","Are you sure you want to <co>pin</c> this object?\nYou will be able to find it in the <cf>pinned</c> tab","Yes","No",[this,objid_str](auto c, bool sel){
-                if (!sel) {
+            geode::createQuickPopup("Pin Object?","Are you sure you want to <cf>pin</c> this <co>object</c>?\nYou will be able to find it in the <cf>pinned</c> tab.","No","Yes",[this,objid_str](auto c, bool sel){
+                if (sel) {
                     auto Pinned_Items = matjson::parse(this->m_fields->m_currentjson).unwrapOrDefault();
                     if (Pinned_Items.contains(objid_str)) {
                         return;
@@ -85,10 +177,15 @@ class $modify(ViperEditorUI,EditorUI) {
                     return;
                 }
                 return;
-            },true);
+            },true)->setID("Pin-Prompt"_spr);
         }
     }
     void onCreateButton(CCObject* x) {
+        #ifdef GEODE_IS_MOBILE
+        if (CCScene::get()->getChildByIDRecursive("Pin-Prompt"_spr)) {
+            return;
+        }
+        #endif
         if (auto xx =  typeinfo_cast<CreateMenuItem*>(x)) {
                 if (xx->m_objectID > 0 && Mod::get()->getSettingValue<bool>("shift-keybind") && CCKeyboardDispatcher::get()->getShiftKeyPressed()) {
                     return popupPrompt(xx->m_objectID);
@@ -135,8 +232,9 @@ class $modify(ViperEditorUI,EditorUI) {
                 return cc;
             }
         };
-        CreateMenuItem* x = EditorUI::getCreateBtn(id,bg);
+        CreateMenuItem* x = EditorUI::getCreateBtn(id,Saved::switchcolorint(Mod::get()->getSettingValue<std::string>("pin-objects-background")));
         this->m_fields->m_btnfix.emplace_back(x);
+        x->setID(fmt::format("viper.object_pinning/object-{}",id));
         return x;
     } 
     CCNode* getCreateBtnViperPatch(int id, int bg, bool isCoolahhButton) {
@@ -145,10 +243,11 @@ class $modify(ViperEditorUI,EditorUI) {
         } else {
             // game sees this as pin button
             auto spr = CCMenuItemSpriteExtra::create(
-                ButtonSprite::create(CCSprite::create("1f4cc.png"_spr), 40, true, 20.f,fmt::format("GJ_button_0{}.png",bg).c_str(),1), 
+                ButtonSprite::create(CCSprite::create("1f4cc.png"_spr), 40, true, 20.f,Saved::switchcolor(Mod::get()->getSettingValue<std::string>("pin-button-background")),1.65), 
                 this, 
                 menu_selector(ViperEditorUI::OnPinButton)
             );
+            spr->setID("viper.object_pinning/pin-object");
             spr->setTag(id);
             return spr;
         }
@@ -188,3 +287,8 @@ class $modify(ViperEditorUI,EditorUI) {
         return true;
     }
 };
+#ifdef GEODE_IS_MOBILE
+void ViperEditorUI_popupPrompt(int obj, EditorUI* editor) {
+   reinterpret_cast<ViperEditorUI*>(editor)->popupPrompt(obj);
+}
+#endif

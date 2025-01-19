@@ -88,6 +88,7 @@ namespace ReversedGDClass {
             }
             buttonObject = CreateMenuItem::create(buttonNode, nullptr, buttonNode, nullptr);   
             buttonObject->m_objectID = param_1; // make sure it cool
+            buttonObject->setID(fmt::format("viper.object_pinning/popup-object-{}",param_1));
             return buttonObject;
     };
 };

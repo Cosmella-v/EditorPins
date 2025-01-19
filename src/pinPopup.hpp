@@ -6,13 +6,49 @@ using namespace geode::prelude;
 
 namespace Saved {
     static std::string Pinned_ItemsString = "";
+    const char* switchcolor(std::string object) {
+        const char* buttonImage;
+        if (object == "Light Blue") {
+            buttonImage = "GJ_button_02.png";
+        } else if (object == "Pink") {
+            buttonImage = "GJ_button_03.png";
+        } else if (object == "Grey") {
+            buttonImage = "GJ_button_04.png";
+        } else if (object == "Dark Grey") {
+            buttonImage = "GJ_button_05.png";
+        } else if (object == "Red") {
+            buttonImage = "GJ_button_06.png";
+        } else {
+            buttonImage = "GJ_button_01.png";
+        }
+
+        return buttonImage;
+    };
+    int switchcolorint(std::string object) {
+        const char* buttonImage;
+        if (object == "Light Blue") {
+           return 2;
+        } else if (object == "Pink") {
+            return 3;
+        } else if (object == "Grey") {
+           return 4;
+        } else if (object == "Dark Grey") {
+           return 5;
+        } else if (object == "Red") {
+            return 6;
+        } else {
+            return 1;
+        }
+        return 1;
+    };
 };
 
 class pinPopup : public geode::Popup<> {
 protected:
     double m_minsize;
     std::function<void()> m_settings;
-    ScrollLayer* scroll; 
+    geode::ScrollLayer* scroll; 
+    geode::Scrollbar* Scrollbar;
     int maxNumber = 8; // max 8 per row
     virtual void onClose(CCObject*x) {
         Mod::get()->setSavedValue<std::string>("Pinned-Items", Saved::Pinned_ItemsString);
@@ -20,15 +56,25 @@ protected:
         geode::Popup<>::onClose(x);
     };
     bool setup() {
+        maxNumber = Mod::get()->getSavedValue<int64_t>("item-per-row");
+        this->setID("object-picker"_spr);
         auto winSize = CCDirector::get()->getWinSize();
 
-        scroll = ScrollLayer::create(ccp(
-            m_mainLayer->getContentSize().width,
+        scroll = geode::ScrollLayer::create(ccp(
+            m_mainLayer->getContentSize().width - 10,
             m_mainLayer->getContentSize().height - 10
         ));
         scroll->setAnchorPoint(m_mainLayer->getAnchorPoint());
         scroll->setPositionY(6);
+        
+        Scrollbar = Scrollbar::create(scroll);
+        Scrollbar->setPositionX(m_mainLayer->getContentSize().width - 3);
+        Scrollbar->setPositionY(6);
+        Scrollbar->setAnchorPoint({1,0});
+        Scrollbar->setScaleX(1.1550);
+        Scrollbar->setID("scroll-bar"_spr);
         m_mainLayer->addChild(scroll);
+        m_mainLayer->addChild(Scrollbar);
 
         return true;
     }
@@ -39,7 +85,7 @@ protected:
         m_settings = setting;
         float basePosY = 150;
         int i = 1;
-        int basecount = INT_MAX - 1;
+        int basecount = maxNumber + 1;
         CCMenu* men = nullptr;
         auto Pinned_Items = matjson::parse(Saved::Pinned_ItemsString).unwrapOrDefault();
         for (const auto& objectName : ObjectToolbox::sharedState()->m_allKeys) {
@@ -58,9 +104,9 @@ protected:
                 men->setLayout(
                     RowLayout::create()
                     ->setGap(5)
-                    ->setAutoScale(false)
+                    ->setAutoScale(true)
                 );
-                men->setContentWidth(scroll->getContentWidth() - 30);
+                men->setContentWidth(scroll->getContentWidth() - 10);
                 men->setPosition(ccp(
                     scroll->getContentSize().width / 2,
                     basePosY - 40 * i
