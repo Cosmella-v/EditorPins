@@ -56,7 +56,7 @@ protected:
         geode::Popup<>::onClose(x);
     };
     bool setup() {
-        maxNumber = Mod::get()->getSavedValue<int64_t>("item-per-row");
+        maxNumber = Mod::get()->getSettingValue<int64_t>("item-per-row");
         this->setID("object-picker"_spr);
         auto winSize = CCDirector::get()->getWinSize();
 

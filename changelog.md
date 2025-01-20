@@ -5,6 +5,7 @@
 - button color settings
 - scale fix for sprites
 - added more ids to objects (for developers)
+- Compatibility with Object Groups (my mistake i thought it wasn't from my old testing)
 # 1.0.1
 - fixed english
 - bug fix ordering

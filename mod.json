@@ -75,12 +75,6 @@
 			"platforms": ["mobile"]
 		}
 	},
-	"incompatibilities": {
-		"razoom.object_groups": {
-			"importance": "breaking",
-			"version": ">=v1.0.0"
-		}
-	},
 	"dependencies": {
 		"alphalaneous.editortab_api": {
 			"version": ">=v1.0.0",
