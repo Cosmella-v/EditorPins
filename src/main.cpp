@@ -28,7 +28,7 @@ bool isValidInteger(const std::string& str) {
 void ViperEditorUI_popupPrompt(int obj, EditorUI* editor);
 #include <Geode/modify/CCMenuItemSpriteExtra.hpp>
 
-class $modify(CreateMenuItem_MobileSelector,CCMenuItemSpriteExtra) {
+class $modify(CCMenuItemSpriteExtra_MobileSelector,CCMenuItemSpriteExtra) {
 struct Fields {
     bool m_trackHolding;
     bool m_HoldAble;
