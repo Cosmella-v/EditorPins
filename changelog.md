@@ -1,3 +1,5 @@
+# 1.0.3
+- fix better edit crash
 # 1.0.2
 - fixed clicking esc pinning
 - mobile hold to pin

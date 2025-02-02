@@ -9,7 +9,7 @@
 	"tags": ["editor","interface"],
 	"id": "viper.object_pinning",
 	"name": "Object Pinning",
-	"version": "v1.0.2",
+	"version": "v1.0.3",
 	"developer": "Viper",
 	"resources" : {
 		"sprites": [
