@@ -4,6 +4,9 @@
 using namespace geode::prelude;
 #include <Geode/modify/EditorUI.hpp>
 
+// debug
+//#define GEODE_IS_MOBILE true;
+
 bool isValidInteger(const std::string& str) {
     if (str.empty()) return false;
     
@@ -25,7 +28,7 @@ bool isValidInteger(const std::string& str) {
 void ViperEditorUI_popupPrompt(int obj, EditorUI* editor);
 #include <Geode/modify/CCMenuItemSpriteExtra.hpp>
 
-class $modify(CCMenuItemSpriteExtra_MobileSelector,CCMenuItemSpriteExtra) {
+class $modify(CreateMenuItem_MobileSelector,CCMenuItemSpriteExtra) {
 struct Fields {
     bool m_trackHolding;
     bool m_HoldAble;
@@ -67,7 +70,6 @@ virtual void selected() {
     }
 }
 virtual void activate() {
-    CCMenuItemSpriteExtra::activate();
     if (this->m_fields->m_HoldAble) {
         if (auto holding = typeinfo_cast<CreateMenuItem*>(this)) {
             this->m_fields->m_trackHolding = false;
@@ -77,9 +79,9 @@ virtual void activate() {
             }
         }
     }
+    CCMenuItemSpriteExtra::activate();
 }
 virtual void unselected() {
-    CCMenuItemSpriteExtra::unselected();
     if (this->m_fields->m_HoldAble) {
         if (auto holding = typeinfo_cast<CreateMenuItem*>(this)) {
             this->m_fields->m_trackHolding = false;
@@ -89,6 +91,7 @@ virtual void unselected() {
             }
         }
     }
+    CCMenuItemSpriteExtra::unselected();
 }
 
 };
