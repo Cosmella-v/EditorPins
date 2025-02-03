@@ -268,7 +268,7 @@ class $modify(ViperEditorUI, EditorUI) {
 		CreateMenuItem *custom = EditorUI::menuItemFromObjectString(data, something);
 		reinterpret_cast<CreateMenuItem_modded *>(custom)->m_fields->m_customobjectid = something;
 #ifdef GEODE_IS_MOBILE
-		if (CCMenuItemSpriteExtra *itemx = typeinfo_cast<CCMenuItemSpriteExtra *>(btn)) {
+		if (CCMenuItemSpriteExtra *itemx = typeinfo_cast<CCMenuItemSpriteExtra *>(custom)) {
 			reinterpret_cast<CCMenuItemSpriteExtra_MobileSelector *>(itemx)->m_fields->m_HoldAble = true;
 		}
 #endif
