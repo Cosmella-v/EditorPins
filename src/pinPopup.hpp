@@ -89,11 +89,8 @@ protected:
         CCMenu* men = nullptr;
         auto Pinned_Items = matjson::parse(Saved::Pinned_ItemsString).unwrapOrDefault();
         for (const auto& objectName : ObjectToolbox::sharedState()->m_allKeys) {
-            if (!Loader::get()->isModLoaded("geode.texture-loader")) {
-                //log::info("object of death {}",objectName.first);
-                if (objectName.first >= 4386 && objectName.first <= 4399) {
-                    continue;
-                }
+            if (objectName.first >= 4386 && objectName.first <= 4399) {
+                continue;
             }
             basecount++;
         

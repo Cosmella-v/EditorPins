@@ -149,7 +149,9 @@ class $modify(ViperEditorUI, EditorUI) {
 		for (const auto &pair : matjson::parse(this->m_fields->m_currentjson).unwrapOrDefault()) {
 			auto item = pair.getKey().value_or("nuUh");
 			if (isValidInteger(item)) {
-				arr->addObject(this->getCreateBtnViperPatch(std::stoi(item), 2));
+				if (auto btn = this->getCreateBtnViperPatch(std::stoi(item), 2)) {
+					arr->addObject(btn); 
+				}
 			}
 		}
 		this->m_fields->m_createEditButtonBar->loadFromItems(arr, cols, rows, true);
@@ -276,7 +278,7 @@ class $modify(ViperEditorUI, EditorUI) {
 	};
 	CCNode *CreateCustomObject(int id) {
 		auto gameManager = GameManager::sharedState();
-		CreateMenuItem *btn;
+		CreateMenuItem *btn = nullptr;
 		std::string objectData = gameManager->stringForCustomObject(id);
 		cocos2d::CCSprite *obj;
 		if (!objectData.empty()) {
@@ -292,18 +294,11 @@ class $modify(ViperEditorUI, EditorUI) {
 	};
 	CCNode *getCreateBtnViperPatch(int id, int bg) {
 		if (id < 1) {
-			if (CCNode *x = CreateCustomObject(id)) {
-				return x;
-			};
-			auto cc = CCNode::create();
-			return cc;
+			return CreateCustomObject(id);
 		};
-		if (!Loader::get()->isModLoaded("geode.texture-loader")) {
-			if (id >= 4386 && id <= 4399) {
-				auto cc = CCNode::create();
-				return cc;
-			}
-		};
+		if (id >= 4386 && id <= 4399) {
+			return nullptr;
+		}
 		CreateMenuItem *x = EditorUI::getCreateBtn(id, Saved::switchcolorint(Mod::get()->getSettingValue<std::string>("pin-objects-background")));
 		this->m_fields->m_btnfix.emplace_back(x);
 		x->setID(fmt::format("viper.object_pinning/object-{}", id));
@@ -338,7 +333,9 @@ class $modify(ViperEditorUI, EditorUI) {
 			for (const auto &pair : matjson::parse(ui->m_fields->m_currentjson).unwrapOrDefault()) {
 				auto item = pair.getKey().value_or("nuUh");
 				if (isValidInteger(item)) {
-					arr->addObject(ui->getCreateBtnViperPatch(std::stoi(item), 2));
+					if (auto btn = ui->getCreateBtnViperPatch(std::stoi(item), 2)) {
+						arr->addObject(btn);
+					}
 				}
 			}
 
