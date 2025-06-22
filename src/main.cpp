@@ -3,6 +3,29 @@
 #include <alphalaneous.editortab_api/include/EditorTabs.hpp>
 using namespace geode::prelude;
 #include <Geode/modify/EditorUI.hpp>
+$on_mod(Loaded)
+{
+	auto modGetFast = Mod::get();
+	modGetFast->setSavedValue<VersionInfo>("current-version", modGetFast->getVersion());
+	if (!modGetFast->getSavedValue<bool>("Patched_v1.0.3")) {
+		auto savedDataJson = modGetFast->getSavedValue<std::string>("Pinned-Items");
+		if (!savedDataJson.empty()) {
+			std::map<std::string, bool> validIds;
+			auto gm = GameManager::get();
+
+			for (const auto &pair : matjson::parse(savedDataJson).unwrapOrDefault()) {
+				if (auto str = pair.getKey()) {
+					int id = std::atoi(str->c_str());
+					if (id > 0 || !gm->stringForCustomObject(id).empty()) {
+						validIds.insert({*str, true});
+					}
+				}
+			}
+			modGetFast->setSavedValue("Pinned-Items", matjson::Value(validIds).dump(0));
+		}
+		modGetFast->setSavedValue<bool>("Patched_v1.0.3",true);
+	}
+} // bug fix
 
 // debug
 // #define GEODE_IS_MOBILE true;
@@ -115,10 +138,14 @@ class $modify(CreateMenuItem_modded, CreateMenuItem) {
 };
 
 class $modify(ViperEditorUI, EditorUI) {
+	static void onModify(auto& self) {
+        (void) self.setHookPriorityAfterPost("EditorUI::init", "alphalaneous.creative_mode");
+    }
 	struct Fields {
 		std::vector<CreateMenuItem *> m_btnfix;
 		int m_objectidx = 0;
 		std::string m_currentjson = "";
+		CCNode* m_tooltip;
 		EditButtonBar *m_createEditButtonBar;
 	};
 #ifdef GEODE_IS_MOBILE
@@ -150,20 +177,23 @@ class $modify(ViperEditorUI, EditorUI) {
 			auto item = pair.getKey().value_or("nuUh");
 			if (isValidInteger(item)) {
 				if (auto btn = this->getCreateBtnViperPatch(std::stoi(item), 2)) {
-					arr->addObject(btn); 
+					arr->addObject(btn);
 				}
 			}
 		}
 		this->m_fields->m_createEditButtonBar->loadFromItems(arr, cols, rows, true);
 		Loader::get()->queueInMainThread([=]() {
-			this->fixsprite_fix();
+			this->updateCreateMenu(false);
 		});
 	}
 	void OnPinButton(CCObject *x) {
-		pinPopup::create([this]() {
+		pinPopup* pop = pinPopup::create([this]() {
 			this->m_fields->m_currentjson = Saved::Pinned_ItemsString;
 			this->updatePinTab();
-		})->show();
+			if (this->m_fields->m_tooltip) this->m_fields->m_tooltip->setVisible(false);
+		});
+		pop->show();
+		if (this->m_fields->m_tooltip) pop->addChild(this->m_fields->m_tooltip);
 	}
 	void popupPrompt(int objid) {
 		std::string objid_str = std::to_string(objid);
@@ -218,54 +248,7 @@ class $modify(ViperEditorUI, EditorUI) {
 			}
 		};
 		EditorUI::onCreateButton(x);
-		return fixsprite_fix();
 	};
-	void fixsprite_fix() {
-		for (size_t i = 0; i < this->m_fields->m_btnfix.size(); ++i) {
-			// std::cout << "Index " << i << ": " << this->m_fields->m_btnfix[i] << "\n";
-			// log::debug("log");
-
-			CreateMenuItem *m_btnfixs = this->m_fields->m_btnfix.at(i);
-			int objid = m_btnfixs->m_objectID;
-			if (objid == 0) {
-				objid = reinterpret_cast<CreateMenuItem_modded *>(m_btnfixs)->m_fields->m_customobjectid;
-			}
-			if (auto xd = typeinfo_cast<ButtonSprite *>(m_btnfixs->getChildByType<ButtonSprite *>(0))) {
-				if (objid == this->m_fields->m_objectidx) {
-					if (objid > 0) {
-						if (xd->m_subBGSprite) {
-							xd->m_subBGSprite->setColor(ccColor3B(177, 177, 177));
-						}
-					} else {
-						log::debug("{}{}", objid, this->m_fields->m_objectidx);
-						if (CCScale9Sprite *spr = xd->getChildByType<CCScale9Sprite *>(0)) {
-							spr->setColor(ccColor3B(177, 177, 177));
-						}
-					}
-				}
-				else {
-					if (objid > 0) {
-						if (xd->m_subBGSprite) {
-							xd->m_subBGSprite->setColor(ccColor3B(255, 255, 255));
-						}
-					} else {
-						if (CCScale9Sprite *spr = xd->getChildByType<CCScale9Sprite *>(0)) {
-							spr->setColor(ccColor3B(255, 255, 255));
-						}
-					}
-
-					// log::debug("log3");
-				}
-				if (objid >= 4386 && objid <= 4399) {
-					if (GameObject *object = xd->getChildByType<GameObject *>(0)) {
-						object->setScale(0.175);
-					};
-				};
-			} else {
-				log::error("something bad got in");
-			}
-		};
-	}
 	CreateMenuItem *menuItemFromObjectString(gd::string data, int something) {
 		CreateMenuItem *custom = EditorUI::menuItemFromObjectString(data, something);
 		reinterpret_cast<CreateMenuItem_modded *>(custom)->m_fields->m_customobjectid = something;
@@ -282,13 +265,12 @@ class $modify(ViperEditorUI, EditorUI) {
 		std::string objectData = gameManager->stringForCustomObject(id);
 		cocos2d::CCSprite *obj;
 		if (!objectData.empty()) {
-			CCPoint position = CCPointZero;
 			btn = menuItemFromObjectString(objectData, id);
 			btn->setID(fmt::format("viper.object_pinning/custom-object{}", id));
+			btn->m_objectID = id;
 			if (auto xd = typeinfo_cast<ButtonSprite *>(btn->getChildByType<ButtonSprite *>(0))) {
 				xd->updateBGImage(Saved::switchcolor(Mod::get()->getSettingValue<std::string>("pin-objects-background")));
 			};
-			this->m_fields->m_btnfix.emplace_back(btn);
 		}
 		return btn;
 	};
@@ -300,7 +282,6 @@ class $modify(ViperEditorUI, EditorUI) {
 			return nullptr;
 		}
 		CreateMenuItem *x = EditorUI::getCreateBtn(id, Saved::switchcolorint(Mod::get()->getSettingValue<std::string>("pin-objects-background")));
-		this->m_fields->m_btnfix.emplace_back(x);
 		x->setID(fmt::format("viper.object_pinning/object-{}", id));
 		return x;
 	}
@@ -319,10 +300,33 @@ class $modify(ViperEditorUI, EditorUI) {
 		}
 		return nullptr;
 	}
+
+	void updateCreateMenu(bool p0) {
+		EditorUI::updateCreateMenu(p0);
+		if (m_selectedObjectIndex != 0) {
+			if (!Loader::get()->isModInstalled("razoom.object_groups")) { // mod has this bug fix
+				for (auto *btn : CCArrayExt<CreateMenuItem *>(m_createButtonArray)) {
+					if (btn->m_objectID == m_selectedObjectIndex) {
+						ReversedGDClass::setColorToCreateBtnNew(btn, false);
+					}
+				}
+			}
+			// object groups doesn't fix custom objects
+			for (auto *btn : CCArrayExt<CreateMenuItem *>(m_customObjectButtonArray)) {
+				ReversedGDClass::setColorToCreateBtnNew(btn, btn->m_objectID != m_selectedObjectIndex);
+			}
+		}
+	}
 	bool init(LevelEditorLayer *editorLayer) {
 		if (!EditorUI::init(editorLayer))
 			return false;
 
+		if (Loader::get()->isModInstalled("alphalaneous.creative_mode")) {
+			auto creativeMode = Loader::get()->getInstalledMod("alphalaneous.creative_mode");
+			if (creativeMode->isEnabled()) {
+				if (CCNode* tooltip = this->getChildByID("tooltip")) this->m_fields->m_tooltip = tooltip; // creative mode support
+			}
+		}
 		this->m_fields->m_currentjson = Mod::get()->getSavedValue<std::string>("Pinned-Items");
 
 		EditorTabs::addTab(this /*The EditorUI*/, TabType::BUILD, "Pin"_spr, [this](EditorUI *uiOld, CCMenuItemToggler *toggler) -> CCNode * { // create the tab
@@ -350,8 +354,7 @@ class $modify(ViperEditorUI, EditorUI) {
 			return this->m_fields->m_createEditButtonBar;
 		},
 		                   [](EditorUI *uiOld, bool state, CCNode *) { // toggled the tab (activates on every tab click)
-			                   ViperEditorUI *ui = reinterpret_cast<ViperEditorUI *>(uiOld);
-			                   ui->fixsprite_fix(); // bug fix
+			                   uiOld->updateCreateMenu(false); 
 		                   });
 
 		return true;

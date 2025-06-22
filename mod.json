@@ -1,5 +1,5 @@
 {
-	"geode": "4.3.1",
+	"geode": "4.5.0",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
@@ -9,7 +9,7 @@
 	"tags": ["editor","interface"],
 	"id": "viper.object_pinning",
 	"name": "Object Pinning",
-	"version": "v1.0.3",
+	"version": "v1.0.4",
 	"developer": "Viper",
 	"resources" : {
 		"sprites": [

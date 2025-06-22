@@ -1,3 +1,7 @@
+# 1.0.4
+- fixed crash with error objects
+- better creative mode support
+- fixed weird grey button glitch
 # 1.0.3
 - fix better edit crash
 - added custom object pinning
