@@ -113,8 +113,17 @@ class pinPopup : public geode::Popup<> {
 			auto menuItem = ReversedGDClass::getCreateBtn(objectName.first, 4);
 			if (Pinned_Items.contains(objid_str)) {
 				if (auto xd = typeinfo_cast<ButtonSprite *>(menuItem->getNormalImage())) {
-					xd->m_subBGSprite->setColor(ccColor3B(0, 255, 0));
+					xd->m_subBGSprite->setColor(ccc3(0, 255, 0));
+					if (auto slot = xd->getChildByID("slot-overlay")) {
+						slot->setVisible(true);
+					};
 				};
+			} else {
+				if (auto xd = typeinfo_cast<ButtonSprite *>(menuItem->getNormalImage())) {
+					if (auto slot = xd->getChildByID("slot-overlay")) {
+						slot->setVisible(false);
+					};
+				}
 			}
 			menuItem->m_pfnSelector = menu_selector(pinPopup::OnPinButton);
 			/*EditorButtonSprite::createWithSpriteFrameName(
@@ -169,16 +178,16 @@ class pinPopup : public geode::Popup<> {
 						slot->setVisible(JsonChange(Item->m_objectID));
 					} else {
 						if (JsonChange(Item->m_objectID)) {
-							xd->m_subBGSprite->setColor(ccColor3B(0, 255, 0));
+							xd->m_subBGSprite->setColor(ccc3(0, 255, 0));
 						} else {
-							xd->m_subBGSprite->setColor(ccColor3B(255, 255, 255));
+							xd->m_subBGSprite->setColor(ccc3(255, 255, 255));
 						}
 					}
 				} else {
 					if (JsonChange(Item->m_objectID)) {
-						xd->m_subBGSprite->setColor(ccColor3B(0, 255, 0));
+						xd->m_subBGSprite->setColor(ccc3(0, 255, 0));
 					} else {
-						xd->m_subBGSprite->setColor(ccColor3B(255, 255, 255));
+						xd->m_subBGSprite->setColor(ccc3(255, 255, 255));
 					}
 				}
 			}
